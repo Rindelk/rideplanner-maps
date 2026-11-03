@@ -13,7 +13,7 @@
   {
    "id": "ontario-north",
    "name": "Ontario North",
-   "description": "Northern Ontario from 45.5° N: Parry Sound and Algonquin's north side to Sudbury, Sault Ste. Marie, Thunder Bay, Kenora and the far north.",
+   "description": "Northern Ontario from 45.5° N: Algonquin's north side, North Bay, Sudbury, Sault Ste. Marie, Thunder Bay, Kenora and the far north.",
    "poly": "ontario.poly",
    "lat_min": 45.5,
    "maxzoom": 14,
