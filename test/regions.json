@@ -1,0 +1,1 @@
+{"regions": [{"id": "test-sudbury", "name": "Sudbury test", "description": "Test cut.", "poly": "test/sudbury.poly", "maxzoom": 14, "whole_area_to_zoom": 8, "drop_layers": ["buildings"]}]}

@@ -1,0 +1,24 @@
+{
+ "regions": [
+  {
+   "id": "ontario-south",
+   "name": "Ontario South",
+   "description": "Southern and central Ontario up to 46.8° N: Windsor to Ottawa, cottage country, Algonquin, Sudbury and North Bay.",
+   "poly": "ontario.poly",
+   "lat_max": 46.8,
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": ["buildings"]
+  },
+  {
+   "id": "ontario-north",
+   "name": "Ontario North",
+   "description": "Northern Ontario from 45.5° N: Parry Sound and Algonquin's north side to Sudbury, Sault Ste. Marie, Thunder Bay, Kenora and the far north.",
+   "poly": "ontario.poly",
+   "lat_min": 45.5,
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": ["buildings"]
+  }
+ ]
+}
