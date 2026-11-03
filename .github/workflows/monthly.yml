@@ -1,0 +1,127 @@
+name: Monthly region maps
+
+# Each region is built in its own job, so the whole of Canada and the USA fits in the runners'
+# limits. The files go into a draft release as they're done; the last job writes the manifest and
+# publishes the release only when every region built.
+
+on:
+  schedule:
+    - cron: "0 7 3 * *"     # the 3rd of each month, after the 1st's planet build is up
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Planet build date, YYYYMMDD (blank for the newest)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: maps
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.pick.outputs.build }}
+      tag: ${{ steps.pick.outputs.tag }}
+      skip: ${{ steps.check.outputs.skip }}
+      regions: ${{ steps.list.outputs.regions }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the planet build
+        id: pick
+        run: |
+          if [ -n "${{ inputs.build }}" ]; then key="${{ inputs.build }}"; else
+            key=$(python3 -c 'import build; print(build.latest_build()["key"].removesuffix(".pmtiles"))'); fi
+          echo "build=$key" >> "$GITHUB_OUTPUT"
+          echo "tag=maps-$key" >> "$GITHUB_OUTPUT"
+          echo "Planet build $key"
+
+      - name: Skip if this build is already published
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.pick.outputs.tag }}"
+          draft=$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null || echo none)
+          if [ "$draft" = "false" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Already published."; exit 0; fi
+          # A draft left by a run that failed part way: start it again.
+          if [ "$draft" = "true" ]; then gh release delete "$tag" --yes; fi
+          gh release create "$tag" --draft --title "Region maps ${{ steps.pick.outputs.build }}" --notes "Building."
+
+      - name: List the regions
+        id: list
+        run: |
+          echo "regions=$(python3 -c 'import json; d = json.load(open("regions.json")); print(json.dumps([d["overview"]["id"]] + [r["id"] for r in d["regions"]]))')" >> "$GITHUB_OUTPUT"
+
+  region:
+    needs: plan
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        id: ${{ fromJSON(needs.plan.outputs.regions) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          python3 build.py out --build "${{ needs.plan.outputs.build }}" --only "${{ matrix.id }}" \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/${{ needs.plan.outputs.tag }}/"
+          python3 verify.py "out/${{ matrix.id }}.pmtiles"
+          ls -l out
+
+      - name: Upload to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ needs.plan.outputs.tag }}" "out/${{ matrix.id }}.pmtiles" "out/${{ matrix.id }}.places.tsv.gz" --clobber
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: region-${{ matrix.id }}
+          path: out/${{ matrix.id }}.region.json
+          retention-days: 7
+
+  publish:
+    needs: [plan, region]
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: region-*
+          merge-multiple: true
+          path: out
+
+      - name: Manifest
+        run: |
+          python3 build.py out --build "${{ needs.plan.outputs.build }}" --manifest-only \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/${{ needs.plan.outputs.tag }}/"
+          want=$(python3 -c 'import json; d = json.load(open("regions.json")); print(1 + len(d["regions"]))')
+          got=$(python3 -c 'import json; print(len(json.load(open("out/manifest.json"))["regions"]))')
+          test "$want" = "$got" || { echo "only $got of $want regions built"; exit 1; }
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ needs.plan.outputs.tag }}"
+          PYTHONIOENCODING=utf-8 python3 notes.py out/manifest.json > out/notes.md
+          gh release upload "$tag" out/manifest.json --clobber
+          gh release edit "$tag" --notes-file out/notes.md --draft=false --latest
+
+      - name: Keep the two newest releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --exclude-drafts --limit 100 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[2:] | .[].tagName' |
+            while read -r old; do gh release delete "$old" --yes --cleanup-tag; done
