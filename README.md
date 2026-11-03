@@ -4,7 +4,7 @@ Offline maps for [RidePlanner](https://github.com/Rindelk/RidePlanner), the Andr
 
 ## Regions
 
-All of Canada and the USA: every province, territory and state, about 15 GB in all. Each is one file, from about 15 MB (Prince Edward Island) to about 900 MB (Quebec North, British Columbia). Most hold zoom 0 to 14. Closer zooms enlarge zoom 14, which already has every road and track. Neighbouring regions overlap a little at their borders, as the outlines do.
+All of Canada and the USA: every province, territory and state, about 14.5 GB in all. Each is one file, from about 13 MB (Hawaii) to about 950 MB (Quebec North, British Columbia). Most hold zoom 0 to 14. Closer zooms enlarge zoom 14, which already has every road and track. Neighbouring regions overlap a little at their borders, as the outlines do.
 
 These regions differ from a plain province or state:
 
