@@ -1,24 +1,872 @@
 {
+ "overview": {
+  "id": "overview",
+  "name": "Canada and USA overview",
+  "country": "",
+  "description": "Canada and the USA up to zoom 6, kept with any region so a zoomed-out map draws from one file.",
+  "poly": [
+   "polys/ontario.poly",
+   "polys/quebec.poly",
+   "polys/alberta.poly",
+   "polys/british-columbia.poly",
+   "polys/manitoba.poly",
+   "polys/new-brunswick.poly",
+   "polys/newfoundland-and-labrador.poly",
+   "polys/northwest-territories.poly",
+   "polys/nova-scotia.poly",
+   "polys/nunavut.poly",
+   "polys/prince-edward-island.poly",
+   "polys/saskatchewan.poly",
+   "polys/yukon.poly",
+   "polys/alabama.poly",
+   "polys/alaska.poly",
+   "polys/arizona.poly",
+   "polys/arkansas.poly",
+   "polys/california.poly",
+   "polys/colorado.poly",
+   "polys/connecticut.poly",
+   "polys/delaware.poly",
+   "polys/florida.poly",
+   "polys/georgia.poly",
+   "polys/hawaii.poly",
+   "polys/idaho.poly",
+   "polys/illinois.poly",
+   "polys/indiana.poly",
+   "polys/iowa.poly",
+   "polys/kansas.poly",
+   "polys/kentucky.poly",
+   "polys/louisiana.poly",
+   "polys/maine.poly",
+   "polys/maryland.poly",
+   "polys/massachusetts.poly",
+   "polys/michigan.poly",
+   "polys/minnesota.poly",
+   "polys/mississippi.poly",
+   "polys/missouri.poly",
+   "polys/montana.poly",
+   "polys/nebraska.poly",
+   "polys/nevada.poly",
+   "polys/new-hampshire.poly",
+   "polys/new-jersey.poly",
+   "polys/new-mexico.poly",
+   "polys/new-york.poly",
+   "polys/north-carolina.poly",
+   "polys/north-dakota.poly",
+   "polys/ohio.poly",
+   "polys/oklahoma.poly",
+   "polys/oregon.poly",
+   "polys/pennsylvania.poly",
+   "polys/rhode-island.poly",
+   "polys/south-carolina.poly",
+   "polys/south-dakota.poly",
+   "polys/tennessee.poly",
+   "polys/texas.poly",
+   "polys/utah.poly",
+   "polys/vermont.poly",
+   "polys/virginia.poly",
+   "polys/washington.poly",
+   "polys/west-virginia.poly",
+   "polys/wisconsin.poly",
+   "polys/wyoming.poly"
+  ],
+  "maxzoom": 6,
+  "overview": true,
+  "drop_layers": [
+   "buildings"
+  ],
+  "lon_max": -50.0
+ },
  "regions": [
   {
    "id": "ontario-south",
    "name": "Ontario South",
+   "country": "Canada",
    "description": "Southern and central Ontario up to 46.8° N: Windsor to Ottawa, cottage country, Algonquin, Sudbury and North Bay.",
-   "poly": "ontario.poly",
-   "lat_max": 46.8,
+   "poly": "polys/ontario.poly",
    "maxzoom": 14,
    "whole_area_to_zoom": 8,
-   "drop_layers": ["buildings"]
+   "drop_layers": [
+    "buildings"
+   ],
+   "lat_max": 46.8
   },
   {
    "id": "ontario-north",
    "name": "Ontario North",
+   "country": "Canada",
    "description": "Northern Ontario from 45.5° N: Algonquin's north side, North Bay, Sudbury, Sault Ste. Marie, Thunder Bay, Kenora and the far north.",
-   "poly": "ontario.poly",
-   "lat_min": 45.5,
+   "poly": "polys/ontario.poly",
    "maxzoom": 14,
    "whole_area_to_zoom": 8,
-   "drop_layers": ["buildings"]
+   "drop_layers": [
+    "buildings"
+   ],
+   "lat_min": 45.5
+  },
+  {
+   "id": "quebec-south",
+   "name": "Quebec South",
+   "country": "Canada",
+   "description": "Southern Quebec up to 50.5° N: Montreal, the Laurentians, Quebec City, the Eastern Townships, Saguenay–Lac-Saint-Jean, Gaspésie and the Côte-Nord to Sept-Îles.",
+   "poly": "polys/quebec.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ],
+   "lat_max": 50.5
+  },
+  {
+   "id": "quebec-north",
+   "name": "Quebec North",
+   "country": "Canada",
+   "description": "Northern Quebec from 49.5° N: Chibougamau, the James Bay Road, Route 389 to Labrador, the Trans-Taiga and Nunavik.",
+   "poly": "polys/quebec.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ],
+   "lat_min": 49.5
+  },
+  {
+   "id": "alberta",
+   "name": "Alberta",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/alberta.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "british-columbia",
+   "name": "British Columbia",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/british-columbia.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "manitoba",
+   "name": "Manitoba",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/manitoba.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "new-brunswick",
+   "name": "New Brunswick",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/new-brunswick.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "newfoundland-and-labrador",
+   "name": "Newfoundland and Labrador",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/newfoundland-and-labrador.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "northwest-territories",
+   "name": "Northwest Territories",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/northwest-territories.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "nova-scotia",
+   "name": "Nova Scotia",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/nova-scotia.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "nunavut",
+   "name": "Nunavut",
+   "country": "Canada",
+   "description": "Up to zoom 11: no roads join its communities, and the whole territory at street zoom would be over 2 GB.",
+   "poly": "polys/nunavut.poly",
+   "maxzoom": 11,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "prince-edward-island",
+   "name": "Prince Edward Island",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/prince-edward-island.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "saskatchewan",
+   "name": "Saskatchewan",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/saskatchewan.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "yukon",
+   "name": "Yukon",
+   "country": "Canada",
+   "description": "",
+   "poly": "polys/yukon.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "alabama",
+   "name": "Alabama",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/alabama.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "alaska",
+   "name": "Alaska",
+   "country": "United States",
+   "description": "All but the Aleutian islands west of 180°.",
+   "poly": "polys/alaska.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ],
+   "lon_max": -129.0
+  },
+  {
+   "id": "arizona",
+   "name": "Arizona",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/arizona.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "arkansas",
+   "name": "Arkansas",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/arkansas.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "california",
+   "name": "California",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/california.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "colorado",
+   "name": "Colorado",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/colorado.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "connecticut",
+   "name": "Connecticut",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/connecticut.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "delaware",
+   "name": "Delaware",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/delaware.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "florida",
+   "name": "Florida",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/florida.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "georgia",
+   "name": "Georgia",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/georgia.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "hawaii",
+   "name": "Hawaii",
+   "country": "United States",
+   "description": "The main islands, Niʻihau to Hawaiʻi.",
+   "poly": "polys/hawaii.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ],
+   "lon_min": -161.0,
+   "lon_max": -154.0,
+   "lat_max": 23.0
+  },
+  {
+   "id": "idaho",
+   "name": "Idaho",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/idaho.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "illinois",
+   "name": "Illinois",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/illinois.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "indiana",
+   "name": "Indiana",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/indiana.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "iowa",
+   "name": "Iowa",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/iowa.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "kansas",
+   "name": "Kansas",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/kansas.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "kentucky",
+   "name": "Kentucky",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/kentucky.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "louisiana",
+   "name": "Louisiana",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/louisiana.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "maine",
+   "name": "Maine",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/maine.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "maryland",
+   "name": "Maryland and DC",
+   "country": "United States",
+   "description": "Maryland and Washington, DC.",
+   "poly": [
+    "polys/maryland.poly",
+    "polys/district-of-columbia.poly"
+   ],
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "massachusetts",
+   "name": "Massachusetts",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/massachusetts.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "michigan",
+   "name": "Michigan",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/michigan.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "minnesota",
+   "name": "Minnesota",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/minnesota.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "mississippi",
+   "name": "Mississippi",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/mississippi.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "missouri",
+   "name": "Missouri",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/missouri.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "montana",
+   "name": "Montana",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/montana.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "nebraska",
+   "name": "Nebraska",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/nebraska.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "nevada",
+   "name": "Nevada",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/nevada.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "new-hampshire",
+   "name": "New Hampshire",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/new-hampshire.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "new-jersey",
+   "name": "New Jersey",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/new-jersey.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "new-mexico",
+   "name": "New Mexico",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/new-mexico.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "new-york",
+   "name": "New York",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/new-york.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "north-carolina",
+   "name": "North Carolina",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/north-carolina.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "north-dakota",
+   "name": "North Dakota",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/north-dakota.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "ohio",
+   "name": "Ohio",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/ohio.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "oklahoma",
+   "name": "Oklahoma",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/oklahoma.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "oregon",
+   "name": "Oregon",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/oregon.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "pennsylvania",
+   "name": "Pennsylvania",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/pennsylvania.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "rhode-island",
+   "name": "Rhode Island",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/rhode-island.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "south-carolina",
+   "name": "South Carolina",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/south-carolina.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "south-dakota",
+   "name": "South Dakota",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/south-dakota.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "tennessee",
+   "name": "Tennessee",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/tennessee.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "texas",
+   "name": "Texas",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/texas.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "utah",
+   "name": "Utah",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/utah.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "vermont",
+   "name": "Vermont",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/vermont.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "virginia",
+   "name": "Virginia",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/virginia.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "washington",
+   "name": "Washington",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/washington.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "west-virginia",
+   "name": "West Virginia",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/west-virginia.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "wisconsin",
+   "name": "Wisconsin",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/wisconsin.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
+  },
+  {
+   "id": "wyoming",
+   "name": "Wyoming",
+   "country": "United States",
+   "description": "",
+   "poly": "polys/wyoming.poly",
+   "maxzoom": 14,
+   "whole_area_to_zoom": 8,
+   "drop_layers": [
+    "buildings"
+   ]
   }
  ]
 }

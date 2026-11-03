@@ -4,14 +4,20 @@ For each region in regions.json it reads only the tiles it needs from the planet
 requests), drops the layers the app doesn't draw (buildings), and writes:
 
   <id>.pmtiles        the map, PMTiles v3, zoom 0 to the region's maxzoom
-  <id>.places.tsv.gz  names for offline search: name, kind, lat, lon, population (one per line)
+  <id>.places.tsv.gz  names for offline search: name, kind, lat, lon, population, search key (one per line)
+  <id>.region.json    the region's manifest entry
 
-plus manifest.json, which the app reads to list the regions and check for updates.
+plus manifest.json, made from every <id>.region.json in OUT_DIR, which the app reads to list the
+regions and check for updates. Regions can so be built one at a time, in separate jobs, and the
+manifest put together at the end with --manifest-only.
+
+The overview (regions.json's "overview") is the whole of the regions at low zoom, in one small file
+the app keeps with any region, so a zoomed-out map draws from it alone rather than from every region.
 Standard library only, so it runs on a stock GitHub runner.
 
-Usage: python build.py OUT_DIR [--build YYYYMMDD] [--only ID] [--maxzoom N] [--regions FILE]
+Usage: python build.py OUT_DIR [--build YYYYMMDD] [--only ID,ID] [--maxzoom N] [--regions FILE] [--manifest-only]
 """
-import argparse, bisect, datetime, gzip, hashlib, json, math, os, struct, sys, tempfile, time, urllib.error, urllib.request
+import argparse, bisect, datetime, gzip, hashlib, json, math, os, re, struct, sys, tempfile, time, unicodedata, urllib.error, urllib.request
 
 BUILDS = "https://build-metadata.protomaps.dev/builds.json"
 PLANET = "https://build.protomaps.com/{key}"
@@ -296,8 +302,15 @@ def lat_to_y(lat, n):
     return (1 - math.log(math.tan(r) + 1 / math.cos(r)) / math.pi) / 2 * n
 def y_to_lat(y, n): return math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y / n))))
 
-def region_tiles(z, rings, lat_min=-90.0, lat_max=90.0):
-    """Tiles at zoom z covering the polygon, cut to a latitude band, with a one-tile margin.
+def region_rings(region):
+    """The region's outline rings: one or more .poly files, less any ring wholly outside its longitude band."""
+    polys = region["poly"] if isinstance(region["poly"], list) else [region["poly"]]
+    lon_min, lon_max = region.get("lon_min", -180.0), region.get("lon_max", 180.0)
+    rings = [r for p in polys for r in read_poly(os.path.join(HERE, p))]
+    return [r for r in rings if max(q[0] for q in r) >= lon_min and min(q[0] for q in r) <= lon_max]
+
+def region_tiles(z, rings, lat_min=-90.0, lat_max=90.0, lon_min=-180.0, lon_max=180.0):
+    """Tiles at zoom z covering the polygon, cut to a latitude and longitude band, with a one-tile margin.
 
     Each tile row is scanned at its top, middle and bottom; the spans inside the polygon there,
     widened by a tile, are the row's tiles. The margin covers coastline wiggles between the scan lines.
@@ -323,6 +336,9 @@ def region_tiles(z, rings, lat_min=-90.0, lat_max=90.0):
                     j = i
             cross.sort()
             for a, b in zip(cross[0::2], cross[1::2]):
+                a, b = max(a, lon_min), min(b, lon_max)
+                if a > b:
+                    continue
                 xa = int(lon_to_x(a, n)) - 1; xb = int(lon_to_x(b, n)) + 1
                 xs.update(range(max(0, xa), min(n - 1, xb) + 1))
         # Rows the band edge cuts still count only if they reach into the band.
@@ -332,7 +348,7 @@ def region_tiles(z, rings, lat_min=-90.0, lat_max=90.0):
         out.update((x, y) for x in xs)
     # Tiles holding a polygon vertex (narrow points the scan lines can miss).
     for lon, lat in pts:
-        if lat_min <= lat <= lat_max:
+        if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
             out.add((min(n - 1, int(lon_to_x(lon, n))), min(n - 1, int(lat_to_y(lat, n)))))
     return out
 
@@ -350,6 +366,13 @@ def inside(rings, lon, lat):
 # ---------------------------------------------------------------- search index
 
 PLACE_KINDS = {"locality", "neighbourhood"}
+
+def search_key(name):
+    """The name as the app compares it: lower case, accents off, anything but letters and digits a space.
+    The same steps as RegionPlaces.normalize in the app."""
+    s = unicodedata.normalize("NFD", name.lower())
+    s = "".join(c for c in s if not unicodedata.category(c).startswith("M"))
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]+", " ", s)).strip()
 POI_KINDS = {
     "water", "lake", "park", "national_park", "nature_reserve", "protected_area", "forest", "camp_site", "caravan_site",
     "peak", "viewpoint", "beach", "aerodrome", "airport", "ferry_terminal", "fuel", "hotel", "motel", "attraction",
@@ -399,7 +422,7 @@ class PlaceIndex:
         rows = kept
         with gzip.open(path, "wt", encoding="utf-8", compresslevel=9) as f:
             for r in rows:
-                f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\n")
+                f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{search_key(r[0])}\n")
         return len(rows)
 
 # ---------------------------------------------------------------- routing squares
@@ -410,7 +433,7 @@ def square_name(lat, lon):
     lo = math.floor(lon / 5) * 5; la = math.floor(lat / 5) * 5
     return f"{'W' if lo < 0 else 'E'}{abs(lo)}_{'S' if la < 0 else 'N'}{abs(la)}"
 
-def region_squares(rings, lat_min, lat_max):
+def region_squares(rings, lat_min, lat_max, lon_min=-180.0, lon_max=180.0):
     """BRouter's 5-degree routing squares under the region, with their current download sizes.
 
     Squares the server has no data for (open water) are left out. Sizes change a little each week.
@@ -418,7 +441,7 @@ def region_squares(rings, lat_min, lat_max):
     # A 0.05-degree grid of points inside the outline; land and water alike, since lakes have islands.
     pts = [p for r in rings for p in r]
     lat0 = max(lat_min, min(p[1] for p in pts)); lat1 = min(lat_max, max(p[1] for p in pts))
-    lon0 = min(p[0] for p in pts); lon1 = max(p[0] for p in pts)
+    lon0 = max(lon_min, min(p[0] for p in pts)); lon1 = min(lon_max, max(p[0] for p in pts))
     names = set()
     lat = lat0
     while lat <= lat1:
@@ -450,28 +473,60 @@ def sha256(path):
                 return h.hexdigest()
             h.update(b)
 
-def build_region(arc, region, out_dir, build, maxzoom_override=None):
-    rid = region["id"]
-    maxz = maxzoom_override if maxzoom_override is not None else region["maxzoom"]
-    rings = read_poly(os.path.join(HERE, region["poly"]))
-    lat_min, lat_max = region.get("lat_min", -90.0), region.get("lat_max", 90.0)
-    full_to = region.get("whole_area_to_zoom", 8)
-    drop = set(region.get("drop_layers", ["buildings"]))
-    index_from = region.get("index_from_zoom", 12)
-    print(f"{rid}: zoom 0-{maxz}, whole area to zoom {full_to}, band {lat_min} to {lat_max}", flush=True)
+def band(region):
+    return (region.get("lat_min", -90.0), region.get("lat_max", 90.0), region.get("lon_min", -180.0), region.get("lon_max", 180.0))
 
+def region_want(arc, region, rings, maxz, quiet=False):
+    """(tile id, z, x, y, (src offset, src length)) for every tile the region's file holds, by tile id."""
+    full_to = maxz if region.get("overview") else region.get("whole_area_to_zoom", 8)
     t0 = time.time()
-    want = []    # (tile id, z, x, y, (src offset, src length))
+    want = []
     for z in range(0, maxz + 1):
-        tiles = region_tiles(z, rings) if z <= full_to else region_tiles(z, rings, lat_min, lat_max)
+        tiles = region_tiles(z, rings) if z <= full_to else region_tiles(z, rings, *band(region))
         for x, y in tiles:
             tid = zxy_to_id(z, x, y)
             r = arc.find(tid)
             if r:
                 want.append((tid, z, x, y, r))
-        if z >= 10:
+        if z >= 10 and not quiet:
             print(f"  z{z}: {len(want)} tiles so far ({time.time() - t0:.0f} s)", flush=True)
     want.sort()
+    return want
+
+def region_bbox(rings, region):
+    lat_min, lat_max, lon_min, lon_max = band(region)
+    pts = [p for r in rings for p in r]
+    return [max(lon_min, min(p[0] for p in pts)), max(lat_min, min(p[1] for p in pts)),
+            min(lon_max, max(p[0] for p in pts)), min(lat_max, max(p[1] for p in pts))]
+
+# Tiles keep about this share of the planet's bytes once the buildings layer is dropped and they're re-packed
+# (0.91 and 1.00 on Ontario South and North, 2026-11); cities lose more, so this overstates them a little.
+KEEP_SHARE = 0.92
+
+def estimate_region(arc, region, maxz):
+    """The map file's size from the planet's directory alone: no tile is fetched."""
+    rings = region_rings(region)
+    want = region_want(arc, region, rings, maxz, quiet=True)
+    distinct = {r for *_, r in want}
+    by_zoom = {}
+    for tid, z, x, y, r in want:
+        by_zoom[z] = by_zoom.get(z, 0) + 1
+    planet_bytes = sum(r[1] for r in distinct)
+    return {"id": region["id"], "tiles": len(want), "distinct": len(distinct), "planet_mb": round(planet_bytes / 1e6, 1),
+            "estimate_mb": round(planet_bytes * KEEP_SHARE / 1e6, 1), "z14_tiles": by_zoom.get(14, 0)}
+
+def build_region(arc, region, out_dir, build, maxzoom_override=None):
+    rid = region["id"]
+    maxz = maxzoom_override if maxzoom_override is not None else region["maxzoom"]
+    rings = region_rings(region)
+    lat_min, lat_max, lon_min, lon_max = band(region)
+    full_to = region.get("whole_area_to_zoom", 8)
+    drop = set(region.get("drop_layers", ["buildings"]))
+    index_from = region.get("index_from_zoom", 12)
+    print(f"{rid}: zoom 0-{maxz}, whole area to zoom {full_to}, band {lat_min} to {lat_max}, {lon_min} to {lon_max}", flush=True)
+
+    t0 = time.time()
+    want = region_want(arc, region, rings, maxz)
 
     # Fetch each distinct source tile once, in data order, merging nearby ranges.
     by_src = {}
@@ -497,7 +552,7 @@ def build_region(arc, region, out_dir, build, maxzoom_override=None):
             raw = blob[s[0] - start:s[0] - start + s[1]]
             tile = decompress(raw, h["tile_comp"])
             z, x, y = by_src[s]
-            if z >= index_from:
+            if z >= index_from and not region.get("overview"):
                 index.add_tile(z, x, y, tile)
             kept = drop_layers(tile, drop)
             packed = raw if len(kept) == len(tile) else gzip.compress(kept, 9, mtime=0)
@@ -518,8 +573,7 @@ def build_region(arc, region, out_dir, build, maxzoom_override=None):
         else:
             entries.append([tid, 1, ln, o])
 
-    pts = [p for r in rings for p in r]
-    bbox = [min(p[0] for p in pts), max(lat_min, min(p[1] for p in pts)), max(p[0] for p in pts), min(lat_max, max(p[1] for p in pts))]
+    bbox = region_bbox(rings, region)
     meta = {
         "name": region["name"],
         "attribution": "© OpenStreetMap contributors",
@@ -534,32 +588,70 @@ def build_region(arc, region, out_dir, build, maxzoom_override=None):
     places = os.path.join(out_dir, f"{rid}.places.tsv.gz")
     count = index.write(places)
     print(f"{rid}: {os.path.getsize(pm) / 1e6:.1f} MB, {len(want)} tiles, {count} names, {time.time() - t0:.0f} s", flush=True)
-    squares = region_squares(rings, lat_min, lat_max)
+    squares = [] if region.get("overview") else region_squares(rings, lat_min, lat_max, lon_min, lon_max)
     print(f"{rid}: routing squares {', '.join(s['name'] for s in squares)}", flush=True)
-    return {
+    entry = {
         "id": rid, "name": region["name"], "description": region["description"],
+        "country": region.get("country", ""),
         "bbox": [round(v, 4) for v in bbox], "maxzoom": maxz,
         "map": {"file": f"{rid}.pmtiles", "bytes": os.path.getsize(pm), "sha256": sha256(pm)},
         "places": {"file": f"{rid}.places.tsv.gz", "bytes": os.path.getsize(places), "sha256": sha256(places), "count": count},
         "routing_squares": squares,
     }
+    if region.get("overview"):
+        entry["overview"] = True
+    with open(os.path.join(out_dir, f"{rid}.region.json"), "w", encoding="utf-8") as f:
+        json.dump(entry, f, indent=1, ensure_ascii=False)
+    return entry
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--build", help="planet build date, YYYYMMDD (default: the newest)")
-    ap.add_argument("--only", help="build just this region id")
+    ap.add_argument("--only", help="build just these regions: ids, separated by commas")
     ap.add_argument("--maxzoom", type=int, help="override every region's max zoom (for quick tests)")
     ap.add_argument("--base-url", default="", help="where the files will be published, for the manifest")
     ap.add_argument("--regions", default=os.path.join(HERE, "regions.json"), help="region list (default: regions.json)")
+    ap.add_argument("--estimate", action="store_true", help="only estimate each map's size, from the planet's directory, into OUT/estimate.json")
+    ap.add_argument("--manifest-only", action="store_true", help="build nothing: put manifest.json together from OUT/*.region.json")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     build = latest_build() if not a.build else {"key": f"{a.build}.pmtiles"}
     print(f"Planet build {build['key']}", flush=True)
-    arc = Archive(PLANET.format(key=build["key"]))
     with open(a.regions, encoding="utf-8") as f:
-        regions = json.load(f)["regions"]
-    done = [build_region(arc, r, a.out, build, a.maxzoom) for r in regions if not a.only or r["id"] == a.only]
+        listed = json.load(f)
+    regions = ([listed["overview"]] if "overview" in listed else []) + listed["regions"]
+    if a.manifest_only:
+        return write_manifest(a.out, regions, build, a.base_url)
+    only = set(a.only.split(",")) if a.only else None
+    if only and only - {r["id"] for r in regions}:
+        sys.exit(f"no such region: {', '.join(sorted(only - {r['id'] for r in regions}))}")
+    arc = Archive(PLANET.format(key=build["key"]))
+    if a.estimate:
+        est = []
+        for r in regions:
+            if only and r["id"] not in only:
+                continue
+            e = estimate_region(arc, r, a.maxzoom if a.maxzoom is not None else r["maxzoom"])
+            print(json.dumps(e), flush=True)
+            est.append(e)
+        with open(os.path.join(a.out, "estimate.json"), "w") as f:
+            json.dump(est, f, indent=1)
+        print(f"total {sum(e['estimate_mb'] for e in est) / 1e3:.1f} GB")
+        return
+    for r in regions:
+        if not only or r["id"] in only:
+            build_region(arc, r, a.out, build, a.maxzoom)
+    write_manifest(a.out, regions, build, a.base_url)
+
+def write_manifest(out, regions, build, base_url):
+    """manifest.json from the regions built into OUT so far, in regions.json's order."""
+    done = []
+    for r in regions:
+        path = os.path.join(out, f"{r['id']}.region.json")
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as f:
+                done.append(json.load(f))
     manifest = {
         "format": 1,
         "build": build["key"].removesuffix(".pmtiles"),
@@ -567,12 +659,12 @@ def main():
         "source": "Protomaps basemap (OpenStreetMap data)",
         "attribution": "© OpenStreetMap contributors",
         "license": "ODbL-1.0",
-        "base_url": a.base_url,
+        "base_url": base_url,
         "regions": done,
     }
-    with open(os.path.join(a.out, "manifest.json"), "w") as f:
-        json.dump(manifest, f, indent=1)
-    print(json.dumps({r["id"]: round(r["map"]["bytes"] / 1e6, 1) for r in done}))
+    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=1, ensure_ascii=False)
+    print(f"manifest: {len(done)} regions, {sum(r['map']['bytes'] for r in done) / 1e9:.2f} GB of maps")
 
 if __name__ == "__main__":
     main()
